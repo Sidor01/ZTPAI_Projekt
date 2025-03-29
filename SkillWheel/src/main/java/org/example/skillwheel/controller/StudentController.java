@@ -6,35 +6,66 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
+@RequestMapping("/api/students")
+public class StudentController {
 
-    private Map<Long, User> users = new HashMap<>();
+    private Map<Long, Student> students = new HashMap<>();
 
-    public UserController() {
-        users.put(1L, new User(1L, "Jan","Kowalski" ,"jan@example.com","janek123"));
-        users.put(2L, new User(2L, "Anna", "Nowak","anna@example.com","kotek"));
+    public StudentController() {
+        students.put(1L, new Student(1L, "Jan", "Kowalski", "jan@example.com", "janek123"));
+        students.put(2L, new Student(2L, "Anna", "Nowak", "anna@example.com", "kotek"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        Optional<User> user = Optional.ofNullable(users.get(id));
-        return user.map(value -> ResponseEntity.ok(value))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body((User) Map.of("error", "User not found")));
+    public ResponseEntity<?> getStudentById(@PathVariable Long id) {
+        if (!students.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
+        }
+        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "student", students.get(id)));
     }
 
-    static class User {
+    @GetMapping
+    public ResponseEntity<?> getAllStudents() {
+        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "students", students.values()));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> addStudent(@RequestBody Student student) {
+        if (students.containsKey(student.getId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(), "error", "Student already exists"));
+        }
+        students.put(student.getId(), student);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", HttpStatus.CREATED.value(), "student", student));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student updatedStudent) {
+        if (!students.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
+        }
+        students.put(id, updatedStudent);
+        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "student", updatedStudent));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
+        if (!students.containsKey(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
+        }
+        students.remove(id);
+        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "message", "Student deleted successfully"));
+    }
+
+    static class Student {
         public Long id;
         public String name;
         public String surname;
         public String email;
         public String password;
 
-        public User(Long id, String name, String surname, String email, String password) {
+        public Student(Long id, String name, String surname, String email, String password) {
             this.id = id;
             this.name = name;
             this.surname = surname;
