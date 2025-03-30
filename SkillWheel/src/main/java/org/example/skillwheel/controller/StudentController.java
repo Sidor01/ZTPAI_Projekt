@@ -1,82 +1,56 @@
 package org.example.skillwheel.controller;
 
+import org.example.skillwheel.model.Student;
+import org.example.skillwheel.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
 
-    private Map<Long, Student> students = new HashMap<>();
+    private final StudentService studentService;
 
-    public StudentController() {
-        students.put(1L, new Student(1L, "Jan", "Kowalski", "jan@example.com", "janek123"));
-        students.put(2L, new Student(2L, "Anna", "Nowak", "anna@example.com", "kotek"));
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getStudentById(@PathVariable Long id) {
-        if (!students.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "student", students.get(id)));
+    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
+        Optional<Student> student = studentService.getStudentById(id);
+        return student.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllStudents() {
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "students", students.values()));
+    public ResponseEntity<List<Student>> getAllStudents() {
+        return ResponseEntity.ok(studentService.getAllStudents());
     }
 
     @PostMapping
-    public ResponseEntity<?> addStudent(@RequestBody Student student) {
-        if (students.containsKey(student.getId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(), "error", "Student already exists"));
-        }
-        students.put(student.getId(), student);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", HttpStatus.CREATED.value(), "student", student));
+    public ResponseEntity<Student> addStudent(@RequestBody Student student) {
+        Student savedStudent = studentService.addStudent(student);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student updatedStudent) {
-        if (!students.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
-        }
-        students.put(id, updatedStudent);
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "student", updatedStudent));
+    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student updatedStudent) {
+        Optional<Student> student = studentService.updateStudent(id, updatedStudent);
+        return student.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
-        if (!students.containsKey(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Student not found"));
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+        boolean deleted = studentService.deleteStudent(id);
+        if (deleted) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();  // 204 No Content for successful delete
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // 404 Not Found if student doesn't exist
         }
-        students.remove(id);
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "message", "Student deleted successfully"));
-    }
-
-    static class Student {
-        public Long id;
-        public String name;
-        public String surname;
-        public String email;
-        public String password;
-
-        public Student(Long id, String name, String surname, String email, String password) {
-            this.id = id;
-            this.name = name;
-            this.surname = surname;
-            this.email = email;
-            this.password = password;
-        }
-
-        public Long getId() { return id; }
-        public String getName() { return name; }
-        public String getEmail() { return email; }
-        public String getSurname() { return surname; }
-        public String getPassword() { return password; }
     }
 }

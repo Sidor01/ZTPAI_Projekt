@@ -1,41 +1,64 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-function App() {
-    const [users, setUsers] = useState([])
-    const [loading, setLoading] = useState(true)
-    useEffect(() => {
-        fetch('https://jsonplaceholder.typicode.com/users')
-            .then(res => res.json())
-            .then(data => {
-                setUsers(data)
-                setLoading(false)
-            })
-            .catch(err => {
-                console.error('Błąd pobierania danych:', err)
-                setLoading(false)
-            }) }, [])
+import { useState } from 'react';
+import './App.css';
+
+const reservationsData = [
+    { id: 1, time: "16:00", date: "07.03.2025", name: "Adam Smith", location: "pl. gen. Władysława Sikorskiego 2/2", reserved: false },
+    { id: 2, time: "17:00", date: "07.03.2025", name: "Anna Kowalska", location: "Kwiatowa 1", reserved: true },
+    { id: 3, time: "18:00", date: "07.03.2025", name: "Adam Smith", location: "pl. gen. Władysława Sikorskiego 2/2", reserved: false },
+    { id: 4, time: "13:30", date: "09.03.2025", name: "Joanna Nowak", location: "pl. gen. Władysława Sikorskiego 2/2", reserved: true },
+    { id: 5, time: "9:15", date: "11.03.2025", name: "Adam Smith", location: "Kwiatowa 11", reserved: false },
+];
+
+export default function Reservations() {
+    const [reservations, setReservations] = useState(reservationsData);
+
+    const handleReserve = (id) => {
+        setReservations(reservations.map(r => r.id === id ? { ...r, reserved: true } : r));
+    };
+
     return (
-        <div className="wrapper">
-            <header>
-                <h1> Lista użytkowników</h1>
-                <p>Dane pobrane z backendu (JSONPlaceholder)</p>
-            </header>
-            {loading ? (
-                <p className="loading">Ładowanie użytkowników...</p>
-            ):(
-                <div className="user-grid">
-                    {users.map(user => (
-                        <div className="user-card" key={user.id}>
-                            <h2>{user.name}</h2>
-                            <p><strong>Email:</strong> {user.email}</p>
-                            <p><strong>Miasto:</strong> {user.address.city}</p>
-                            <p><strong>Firma:</strong> {user.company.name}</p>
-                            <a href={`http://${user.website}`} target="_blank"
-                               rel="noreferrer">
-                                Strona: {user.website}
-                            </a>
-                        </div> ))}
-                </div> )}
-        </div> )
+        <div className="container">
+            <div className="top-bar">
+                <h1> Reservations | Student </h1>
+            </div>
+            <div className="left-bar">
+                <button className="profile">
+                    Profile
+                </button>
+                <button className="make-a-reservation">
+                    Make a reservation
+                </button>
+            </div>
+            <div className="intersection-box">
+                <h3>Jan Kowalski</h3>
+            </div>
+            <div className="reservation-box">
+                <h2>Make a reservation</h2>
+                <div className="reservation-list">
+                    {reservations.map(({id, time, date, name, location, reserved}) => (
+                        <div key={id} className="reservation-item">
+                            <div className="reservation-details">
+                                <div className="reservation-info">
+                                    <p className="reservation-time">{time} - {date}</p>
+                                    <p className="reservation-name">{name}</p>
+                                    <p className="reservation-location">{location}</p>
+                                </div>
+                                <div className="reservation-action">
+                                    {reserved ? (
+                                        <button className="reserved-button" disabled>
+                                            Reserved
+                                        </button>
+                                    ) : (
+                                        <button className="reserve-button" onClick={() => handleReserve(id)}>
+                                            Reserve
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 }
-export default App
