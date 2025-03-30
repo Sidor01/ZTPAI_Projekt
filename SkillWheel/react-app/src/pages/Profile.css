@@ -11,43 +11,42 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100px; /* Dwukrotnie grubszy */
-    background-color: #575875; /* Jeszcze ciemniejszy fiolet */
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień */
+    height: 100px;
+    background-color: #575875;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
     z-index: 10;
 }
 
-/* Ciemnofioletowy pasek po lewej stronie */
 .left-bar {
     position: absolute;
     top: 0;
     left: 0;
-    width: 160px; /* Dwukrotnie grubszy */
+    width: 170px;
     height: 100vh;
-    background-color: #616283; /* Ten sam ciemny fiolet */
-    box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień na prawo */
-    z-index: 11; /* Nachodzi na top-bar */
+    background-color: #616283;
+    box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.4);
+    z-index: 11;
 }
 
 .intersection-box {
     position: absolute;
     top: 0;
     left: 0;
-    width: 160px;
+    width: 170px;
     height: 160px;
-    background-color: #575875; /* Ciemniejszy fiolet */
+    background-color: #575875;
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
-    z-index: 12; /* Najwyższa warstwa, nachodzi na paski */
+    z-index: 12;
 }
 
 .intersection-box h3 {
     position: absolute;
-    bottom: 10px; /* Przesunięcie tekstu do dolnej krawędzi */
+    bottom: 10px;
     left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie tekstu */
-    font-size: 14px; /* Mniejszy rozmiar */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: black;
+    font-weight: normal;
     text-align: center;
     width: 100%;
     font-weight: light;
@@ -55,12 +54,12 @@
 
 .top-bar h1 {
     position: absolute;
-    top: 16%; /* Wyśrodkowanie tekstu w pionie */
-    left: 190px; /* Wyrównanie do lewej krawędzi */
-    transform: translateY(-50%); /* Wyśrodkowanie tekstu w pionie */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
-    text-align: left; /* Wyrównanie tekstu do lewej */
+    top: 16%;
+    left: 190px;
+    transform: translateY(-50%);
+    color: black;
+    font-weight: normal;
+    text-align: left;
     width: 100%;
     font-weight: lighter;
 }
@@ -68,19 +67,19 @@
 .make-a-reservation {
     position: absolute;
     top: 204px;
-    left: 0=2; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .make-a-reservation:hover {
@@ -91,19 +90,19 @@
 .profile {
     position: absolute;
     top: 258px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .profile:hover {
@@ -112,33 +111,78 @@
 }
 
 .userIcon {
-    width: 40px; /* Dostosuj rozmiar */
+    width: 40px;
     height: 40px;
     position: absolute;
-    top: 10px; /* Dopasuj do potrzeb */
+    top: 10px;
     left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie */
+    transform: translateX(-50%);
 }
 
 .reservations {
     position: absolute;
     top: 312px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .reservations:hover {
     background-color: #575875;
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.center-panel {
+    position: absolute;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+}
+
+.input-field {
+    width: 120%;
+    height: 30px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    border-color: #616283;
+    background-color: white;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+    font-weight: lighter;
+    font-size: 20px;
+    color:black;
+}
+
+.save-profile-button {
+    width: 40%;
+    padding: 10px;
+    background-color: #616283;
+    font-weight: lighter;
+    border-color: #616283;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 12px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+}
+
+.save-profile-button:hover {
+    background-color: #575875;
 }

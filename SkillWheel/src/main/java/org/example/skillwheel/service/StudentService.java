@@ -35,6 +35,7 @@ public class StudentService {
                     student.setSurname(updatedStudent.getSurname());
                     student.setEmail(updatedStudent.getEmail());
                     student.setPassword(updatedStudent.getPassword());
+                    student.setNameOfSchool(updatedStudent.getNameOfSchool());
                     return studentRepository.save(student);
                 });
     }

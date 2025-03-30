@@ -1,6 +1,6 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import './Reservations.css';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const reservationsData = [
     {
@@ -32,9 +32,7 @@ const reservationsData = [
 ];
 
 export default function Reservations() {
-
     const navigate = useNavigate();
-
     const [reservations, setReservations] = useState(reservationsData);
 
     const handleReserve = (id) => {

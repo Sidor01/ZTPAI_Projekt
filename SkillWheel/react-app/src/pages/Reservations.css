@@ -9,42 +9,39 @@
 
 .reservation-box {
     background: #FDFAF0;
-    padding: 40px 16px; /* Zmniejszony padding boczny */
+    padding: 40px 16px;
     border-radius: 8px;
     width: 90%;
     max-width: 1000px;
     color: gray;
 }
 
-
-/* Nagłówek */
 h2 {
     margin-bottom: 20px;
-    font-size: 22px;
+    font-size: 40px;
     text-align: center;
+    font-weight:lighter;
 }
 
-/* Lista rezerwacji */
 .reservation-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
-
 }
 
 .reservation-item {
     display: flex;
-    width: calc(100% - 32px); /* Odejmij marginesy, aby wyrównać */
+    width: calc(100% - 32px);
     background: #FDFAF0;
     padding: 14px 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     border: 0.5px solid rgba(0, 0, 0, 0.35);
     color: gray;
-    margin: 8px auto; /* Wyśrodkowanie elementu */
+    margin: 8px auto;
+    font-weight: lighter;
 }
 
-/* Główna sekcja szczegółów rezerwacji */
 .reservation-details {
     display: flex;
     align-items: center;
@@ -52,102 +49,103 @@ h2 {
     justify-content: space-between;
 }
 
-/* Informacje o rezerwacji */
 .reservation-info {
     display: flex;
     align-items: center;
     gap: 20px;
     flex-grow: 1;
-    white-space: nowrap; /* Zapobiega łamaniu tekstu */
+    white-space: nowrap;
 }
 
-/* Styl tekstu */
 .reservation-time {
-    font-weight: bold;
-    min-width: 150px; /* Stała szerokość dla równego wyrównania */
+    font-weight: lighter;
+    color: black;
+    min-width: 150px;
+    font-size: 18px;
 }
 
 .reservation-name {
-    font-weight: 500;
-    min-width: 200px; /* Upewnia się, że nazwy są równo ustawione */
+    font-size: 18px;
+    min-width: 200px;
+    color: black;
+    font-weight: lighter;
 }
 
 .reservation-location {
-    font-size: 14px;
+    font-size: 18px;
     flex-grow: 1;
+    color: black;
+    font-weight: lighter;
 }
 
-/* Przycisk rezerwacji */
 .reserve-button, .reserved-button {
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 15px;
     cursor: pointer;
     min-width: 100px;
     text-align: center;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+    font-weight: lighter;
 }
 
 .reserve-button {
-    background-color: #4a4a4a;
+    background-color: #616283;
     color: white;
 }
 
 .reserve-button:hover {
-    background-color: #333;
+    background-color: #575875;
 }
 
-/* Przycisk zajętej rezerwacji */
 .reserved-button {
-    background-color: red;
+    background-color: #dd1313;
     color: white;
     cursor: not-allowed;
 }
 
-/* Ciemnofioletowy pasek na górze */
 .top-bar {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100px; /* Dwukrotnie grubszy */
-    background-color: #575875; /* Jeszcze ciemniejszy fiolet */
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień */
+    height: 100px;
+    background-color: #575875;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
     z-index: 10;
 }
 
-/* Ciemnofioletowy pasek po lewej stronie */
 .left-bar {
     position: absolute;
     top: 0;
     left: 0;
-    width: 160px; /* Dwukrotnie grubszy */
+    width: 170px;
     height: 100vh;
-    background-color: #616283; /* Ten sam ciemny fiolet */
-    box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień na prawo */
-    z-index: 11; /* Nachodzi na top-bar */
+    background-color: #616283;
+    box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.4);
+    z-index: 11;
 }
 
 .intersection-box {
     position: absolute;
     top: 0;
     left: 0;
-    width: 160px;
+    width: 170px;
     height: 160px;
-    background-color: #575875; /* Ciemniejszy fiolet */
+    background-color: #575875;
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
-    z-index: 12; /* Najwyższa warstwa, nachodzi na paski */
+    z-index: 12;
 }
 
 .intersection-box h3 {
     position: absolute;
-    bottom: 10px; /* Przesunięcie tekstu do dolnej krawędzi */
+    bottom: 10px;
     left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie tekstu */
-    font-size: 14px; /* Mniejszy rozmiar */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: black;
+    font-weight: normal;
     text-align: center;
     width: 100%;
     font-weight: light;
@@ -155,12 +153,12 @@ h2 {
 
 .top-bar h1 {
     position: absolute;
-    top: 16%; /* Wyśrodkowanie tekstu w pionie */
-    left: 190px; /* Wyrównanie do lewej krawędzi */
-    transform: translateY(-50%); /* Wyśrodkowanie tekstu w pionie */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
-    text-align: left; /* Wyrównanie tekstu do lewej */
+    top: 16%;
+    left: 190px;
+    transform: translateY(-50%);
+    color: black;
+    font-weight: normal;
+    text-align: left;
     width: 100%;
     font-weight: lighter;
 }
@@ -168,19 +166,19 @@ h2 {
 .make-a-reservation {
     position: absolute;
     top: 204px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .make-a-reservation:hover {
@@ -191,19 +189,19 @@ h2 {
 .profile {
     position: absolute;
     top: 258px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .profile:hover {
@@ -212,254 +210,30 @@ h2 {
 }
 
 .userIcon {
-    width: 40px; /* Dostosuj rozmiar */
+    width: 40px;
     height: 40px;
     position: absolute;
-    top: 10px; /* Dopasuj do potrzeb */
+    top: 10px;
     left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie */
+    transform: translateX(-50%);
 }
-
-
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100vw;
-    background-color: #FDFAF0;
-}
-
-.reservation-box {
-    background: #FDFAF0;
-    padding: 40px 16px; /* Zmniejszony padding boczny */
-    border-radius: 8px;
-    width: 90%;
-    max-width: 1000px;
-    color: gray;
-}
-
-
-/* Nagłówek */
-h2 {
-    margin-bottom: 20px;
-    font-size: 22px;
-    text-align: center;
-}
-
-/* Lista rezerwacji */
-.reservation-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-}
-
-.reservation-item {
-    display: flex;
-    width: calc(100% - 32px); /* Odejmij marginesy, aby wyrównać */
-    background: #FDFAF0;
-    padding: 14px 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-    border: 0.5px solid rgba(0, 0, 0, 0.35);
-    color: gray;
-    margin: 8px auto; /* Wyśrodkowanie elementu */
-}
-
-/* Główna sekcja szczegółów rezerwacji */
-.reservation-details {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: space-between;
-}
-
-/* Informacje o rezerwacji */
-.reservation-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-grow: 1;
-    white-space: nowrap; /* Zapobiega łamaniu tekstu */
-}
-
-/* Styl tekstu */
-.reservation-time {
-    font-weight: bold;
-    min-width: 150px; /* Stała szerokość dla równego wyrównania */
-}
-
-.reservation-name {
-    font-weight: 500;
-    min-width: 200px; /* Upewnia się, że nazwy są równo ustawione */
-}
-
-.reservation-location {
-    font-size: 14px;
-    flex-grow: 1;
-}
-
-/* Przycisk rezerwacji */
-.reserve-button, .reserved-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    min-width: 100px;
-    text-align: center;
-}
-
-.reserve-button {
-    background-color: #4a4a4a;
-    color: white;
-}
-
-.reserve-button:hover {
-    background-color: #333;
-}
-
-/* Przycisk zajętej rezerwacji */
-.reserved-button {
-    background-color: red;
-    color: white;
-    cursor: not-allowed;
-}
-
-/* Ciemnofioletowy pasek na górze */
-.top-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100px; /* Dwukrotnie grubszy */
-    background-color: #575875; /* Jeszcze ciemniejszy fiolet */
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień */
-    z-index: 10;
-}
-
-/* Ciemnofioletowy pasek po lewej stronie */
-.left-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 160px; /* Dwukrotnie grubszy */
-    height: 100vh;
-    background-color: #616283; /* Ten sam ciemny fiolet */
-    box-shadow: 6px 0px 12px rgba(0, 0, 0, 0.4); /* Mocniejszy cień na prawo */
-    z-index: 11; /* Nachodzi na top-bar */
-}
-
-.intersection-box {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 160px;
-    height: 160px;
-    background-color: #575875; /* Ciemniejszy fiolet */
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
-    z-index: 12; /* Najwyższa warstwa, nachodzi na paski */
-}
-
-.intersection-box h3 {
-    position: absolute;
-    bottom: 10px; /* Przesunięcie tekstu do dolnej krawędzi */
-    left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie tekstu */
-    font-size: 14px; /* Mniejszy rozmiar */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
-    text-align: center;
-    width: 100%;
-    font-weight: light;
-}
-
-.top-bar h1 {
-    position: absolute;
-    top: 16%; /* Wyśrodkowanie tekstu w pionie */
-    left: 190px; /* Wyrównanie do lewej krawędzi */
-    transform: translateY(-50%); /* Wyśrodkowanie tekstu w pionie */
-    color: black; /* Czarny kolor tekstu */
-    font-weight: normal; /* Lżejsza czcionka, jeśli chcesz */
-    text-align: left; /* Wyrównanie tekstu do lewej */
-    width: 100%;
-    font-weight: lighter;
-}
-
-.make-a-reservation {
-    position: absolute;
-    top: 204px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
-    background-color: #616283;
-    color: black;
-    font-weight: normal;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
-}
-
-.make-a-reservation:hover {
-    background-color: #575875;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
-}
-
-.profile {
-    position: absolute;
-    top: 258px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
-    background-color: #616283;
-    color: black;
-    font-weight: normal;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
-}
-
-.profile:hover {
-    background-color: #575875;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
-}
-
-.userIcon {
-    width: 40px; /* Dostosuj rozmiar */
-    height: 40px;
-    position: absolute;
-    top: 10px; /* Dopasuj do potrzeb */
-    left: 50%;
-    transform: translateX(-50%); /* Wyśrodkowanie */
-}
-
 
 .reservations {
     position: absolute;
     top: 312px;
-    left: 0; /* Rozpoczęcie od lewej krawędzi */
-    width: 100%; /* Szerokość przycisku równa szerokości lewego paska */
-    padding: 10px 0; /* Tylko padding w pionie, aby przycisk był wyższy */
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
     background-color: #616283;
     color: black;
     font-weight: normal;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    text-align: center; /* Wyśrodkowanie tekstu w poziomie */
-    box-sizing: border-box; /* Upewnia się, że padding nie wpłynie na szerokość */
-    transform: translateY(-50%); /* Wyśrodkowanie przycisku w pionie */
-    font-size: 16px; /* Opcjonalnie możesz ustawić rozmiar czcionki */
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
 }
 
 .reservations:hover {
