@@ -11,7 +11,7 @@ const reservationsData = [
         location: "pl. gen. Władysława Sikorskiego 2/2",
         reserved: false
     },
-    {id: 2, time: "17:00", date: "07.03.2025", name: "Anna Kowalska", location: "Kwiatowa 1", reserved: true},
+    {id: 2, time: "17:00", date: "07.03.2025", name: "Anna Kowalska", location: "Kwiatowa 11", reserved: true},
     {
         id: 3,
         time: "18:00",
@@ -47,16 +47,20 @@ export default function Reservations() {
         navigate('/reservations')
     }
 
+    const handleMakeAReservationClick = () => {
+        navigate('/make-a-reservation')
+    }
+
     return (
         <div className="container">
             <div className="top-bar">
-                <h1> Reservations | Student </h1>
+                <h1> Reservations | Instructor </h1>
             </div>
             <div className="left-bar">
                 <button className="profile" onClick={handleProfileClick}>
                     Profile
                 </button>
-                <button className="make-a-reservation">
+                <button className="make-a-reservation" onClick={handleMakeAReservationClick}>
                     Make a reservation
                 </button>
                 <button className="reservations" onClick={handleReservationsClick}>

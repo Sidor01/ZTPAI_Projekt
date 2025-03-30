@@ -19,6 +19,10 @@ export default function Profile() {
         navigate('/profile')
     }
 
+    const handleMakeAReservationClick = () => {
+        navigate('/make-a-reservation')
+    }
+
     return (
         <div className="container">
             <div className="center-panel">
@@ -61,13 +65,13 @@ export default function Profile() {
             </div>
 
             <div className="top-bar">
-                <h1> Profile | Student </h1>
+                <h1> Profile | Instructor </h1>
             </div>
             <div className="left-bar">
                 <button className="profile" onClick={handleProfileClick}>
                     Profile
                 </button>
-                <button className="make-a-reservation">
+                <button className="make-a-reservation" onClick={handleMakeAReservationClick}>
                     Make a reservation
                 </button>
                 <button className="reservations" onClick={handleReservationsClick}>
