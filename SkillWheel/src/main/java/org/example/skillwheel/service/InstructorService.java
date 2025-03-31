@@ -1,6 +1,5 @@
 package org.example.skillwheel.service;
 
-import org.example.skillwheel.controller.InstructorController;
 import org.example.skillwheel.model.Instructor;
 import org.example.skillwheel.repository.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;

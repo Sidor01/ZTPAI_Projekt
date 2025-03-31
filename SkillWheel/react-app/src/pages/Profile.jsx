@@ -17,7 +17,8 @@ export default function Profile() {
         // Pobierz dane użytkownika o ID 1
         axios.get(`/api/instructors/${userId}`)
             .then(response => {
-                const instructor = response.data;
+                console.log('API response:', response.data);
+                const instructor = response.data.instructor;
                 setName(instructor.name);
                 setSurname(instructor.surname);
                 setEmail(instructor.email);
@@ -25,7 +26,7 @@ export default function Profile() {
                 setSchoolName(instructor.nameOfSchool);
             })
             .catch(error => {
-                console.error('Error fetching student data:', error);
+                console.error('Error fetching instructor data:', error);
             });
     }, [userId]);
 

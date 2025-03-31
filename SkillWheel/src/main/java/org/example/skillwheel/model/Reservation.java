@@ -1,6 +1,7 @@
 package org.example.skillwheel.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -26,17 +27,28 @@ public class Reservation {
 
     @Column(name = "reservation_time", nullable = false)
     private LocalTime reservationTime;
+    @Column(name = "reservation_place", nullable = false)
+    private String reservationPlace;
 
-    // Constructors
-    public Reservation() {}
+    public Reservation() {
+    }
 
-    public Reservation(Long id, Boolean isReserved, Long studentID, Long instructorID, LocalDate reservationDate, LocalTime reservationTime) {
+    public Reservation(Long id, Boolean isReserved, Long studentID, Long instructorID, LocalDate reservationDate, LocalTime reservationTime, String reservationPlace) {
         this.id = id;
         this.isReserved = isReserved;
         this.studentID = studentID;
         this.instructorID = instructorID;
         this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
+        this.reservationPlace = reservationPlace;
+    }
+
+    public String getReservationPlace() {
+        return reservationPlace;
+    }
+
+    public void setReservationPlace(String reservationPlace) {
+        this.reservationPlace = reservationPlace;
     }
 
     // Getters and Setters

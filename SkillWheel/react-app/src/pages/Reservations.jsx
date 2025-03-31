@@ -1,39 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Reservations.css';
 import { useNavigate } from "react-router-dom";
 
-const reservationsData = [
-    {
-        id: 1,
-        time: "16:00",
-        date: "07.03.2025",
-        name: "Adam Smith",
-        location: "pl. gen. Władysława Sikorskiego 2/2",
-        reserved: false
-    },
-    {id: 2, time: "17:00", date: "07.03.2025", name: "Anna Kowalska", location: "Kwiatowa 11", reserved: true},
-    {
-        id: 3,
-        time: "18:00",
-        date: "07.03.2025",
-        name: "Adam Smith",
-        location: "pl. gen. Władysława Sikorskiego 2/2",
-        reserved: false
-    },
-    {
-        id: 4,
-        time: "13:30",
-        date: "09.03.2025",
-        name: "Joanna Nowak",
-        location: "pl. gen. Władysława Sikorskiego 2/2",
-        reserved: true
-    },
-    {id: 5, time: "9:15", date: "11.03.2025", name: "Adam Smith", location: "Kwiatowa 11", reserved: false},
-];
-
 export default function Reservations() {
     const navigate = useNavigate();
-    const [reservations, setReservations] = useState(reservationsData);
+    const [reservations, setReservations] = useState([]);
+    const [instructor, setInstructor] = useState({ name: '', surname: '' });
+
+    useEffect(() => {
+        // Fetch reservations
+        fetch('/api/reservations/instructor/1')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 200) {
+                    setReservations(data.reservations);
+                } else {
+                    console.error('Failed to fetch reservations:', data.error);
+                }
+            })
+            .catch(error => console.error('Error fetching reservations:', error));
+
+        // Fetch instructor details
+        fetch('/api/instructors/1')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 200) {
+                    setInstructor(data.instructor);
+                } else {
+                    console.error('Failed to fetch instructor:', data.error);
+                }
+            })
+            .catch(error => console.error('Error fetching instructor:', error));
+    }, []);
 
     const handleReserve = (id) => {
         setReservations(reservations.map(r => r.id === id ? {...r, reserved: true} : r));
@@ -44,17 +42,17 @@ export default function Reservations() {
     };
 
     const handleReservationsClick = () => {
-        navigate('/reservations')
-    }
+        navigate('/reservations');
+    };
 
     const handleMakeAReservationClick = () => {
-        navigate('/make-a-reservation')
-    }
+        navigate('/make-a-reservation');
+    };
 
     return (
         <div className="container">
             <div className="top-bar">
-                <h1> Reservations | Instructor </h1>
+                <h1>Reservations | Instructor</h1>
             </div>
             <div className="left-bar">
                 <button className="profile" onClick={handleProfileClick}>
@@ -74,16 +72,16 @@ export default function Reservations() {
             <div className="reservation-box">
                 <h2>Make a reservation</h2>
                 <div className="reservation-list">
-                    {reservations.map(({id, time, date, name, location, reserved}) => (
+                    {reservations.map(({id, reservationTime, reservationDate, reservationPlace, isReserved}) => (
                         <div key={id} className="reservation-item">
                             <div className="reservation-details">
                                 <div className="reservation-info">
-                                    <p className="reservation-time">{time} - {date}</p>
-                                    <p className="reservation-name">{name}</p>
-                                    <p className="reservation-location">{location}</p>
+                                    <p className="reservation-time">{reservationTime} - {reservationDate}</p>
+                                    <p className="reservation-name">{instructor.name} {instructor.surname}</p>
+                                    <p className="reservation-location">{reservationPlace}</p>
                                 </div>
                                 <div className="reservation-action">
-                                    {reserved ? (
+                                    {isReserved ? (
                                         <button className="reserved-button" disabled>
                                             Reserved
                                         </button>
