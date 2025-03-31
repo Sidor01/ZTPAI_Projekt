@@ -1,15 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Profile.css';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 export default function Profile() {
     const navigate = useNavigate();
 
-    const [name, setName] = useState("Jan");
-    const [surname, setSurname] = useState("Kowalski");
-    const [email, setEmail] = useState("jan.kowalski@example.com");
-    const [password, setPassword] = useState("password123");
-    const [schoolName] = useState("Example School");
+    const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [schoolName, setSchoolName] = useState("");
+    const [userId, setUserId] = useState(1);
+
+    useEffect(() => {
+        // Pobierz dane użytkownika o ID 1
+        axios.get(`/api/students/${userId}`)
+            .then(response => {
+                const student = response.data;
+                setName(student.name);
+                setSurname(student.surname);
+                setEmail(student.email);
+                setPassword(student.password);
+                setSchoolName(student.nameOfSchool);
+            })
+            .catch(error => {
+                console.error('Error fetching student data:', error);
+            });
+    }, [userId]);
+
+    const handleSaveClick = () => {
+        const updatedStudent = {
+            name,
+            surname,
+            email,
+            password,
+            nameOfSchool: schoolName
+        };
+
+        axios.put(`/api/students/${userId}`, updatedStudent)
+            .then(response => {
+                console.log('Student data updated successfully', response.data);
+                alert('Profile updated successfully');
+            })
+            .catch(error => {
+                console.error('Error updating student data:', error);
+                alert('Failed to update profile');
+            });
+    };
 
     const handleReservationsClick = () => {
         navigate('/reservations')
@@ -61,7 +99,7 @@ export default function Profile() {
                     value={schoolName}
                     disabled
                 />
-                <button className="save-profile-button">Save</button>
+                <button className="save-profile-button" onClick={handleSaveClick}>Save</button>
             </div>
 
             <div className="top-bar">

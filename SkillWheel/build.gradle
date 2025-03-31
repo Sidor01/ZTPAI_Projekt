@@ -39,3 +39,16 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+task buildReactApp(type: Exec) {
+	workingDir 'react-app'
+	commandLine 'npm', 'run', 'build'
+}
+
+task copyFrontendBuild(type: Copy) {
+	dependsOn buildReactApp
+	from 'react-app/dist/.'
+	into 'src/main/resources/static'
+}
+
+build.dependsOn copyFrontendBuild

@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private static final Logger LOGGER = Logger.getLogger(StudentService.class.getName());
 
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
@@ -31,6 +33,8 @@ public class StudentService {
     public Optional<Student> updateStudent(Long id, Student updatedStudent) {
         return studentRepository.findById(id)
                 .map(student -> {
+                    LOGGER.info("Updating student with ID: " + id);
+                    LOGGER.info("New data: " + updatedStudent);
                     student.setName(updatedStudent.getName());
                     student.setSurname(updatedStudent.getSurname());
                     student.setEmail(updatedStudent.getEmail());
