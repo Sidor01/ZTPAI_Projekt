@@ -15,14 +15,14 @@ export default function Profile() {
 
     useEffect(() => {
         // Pobierz dane użytkownika o ID 1
-        axios.get(`/api/students/${userId}`)
+        axios.get(`/api/instructors/${userId}`)
             .then(response => {
-                const student = response.data;
-                setName(student.name);
-                setSurname(student.surname);
-                setEmail(student.email);
-                setPassword(student.password);
-                setSchoolName(student.nameOfSchool);
+                const instructor = response.data;
+                setName(instructor.name);
+                setSurname(instructor.surname);
+                setEmail(instructor.email);
+                setPassword(instructor.password);
+                setSchoolName(instructor.nameOfSchool);
             })
             .catch(error => {
                 console.error('Error fetching student data:', error);
@@ -30,7 +30,7 @@ export default function Profile() {
     }, [userId]);
 
     const handleSaveClick = () => {
-        const updatedStudent = {
+        const updatedInstructor = {
             name,
             surname,
             email,
@@ -38,13 +38,13 @@ export default function Profile() {
             nameOfSchool: schoolName
         };
 
-        axios.put(`/api/students/${userId}`, updatedStudent)
+        axios.put(`/api/instructors/${userId}`, updatedInstructor)
             .then(response => {
-                console.log('Student data updated successfully', response.data);
+                console.log('Instructor data updated successfully', response.data);
                 alert('Profile updated successfully');
             })
             .catch(error => {
-                console.error('Error updating student data:', error);
+                console.error('Error updating instructor data:', error);
                 alert('Failed to update profile');
             });
     };

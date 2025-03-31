@@ -1,5 +1,6 @@
 package org.example.skillwheel.controller;
 
+import org.example.skillwheel.model.Reservation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,7 @@ public class ReservationController {
     @GetMapping("/student/{studentId}")
     public ResponseEntity<?> getReservationsByStudentId(@PathVariable Long studentId) {
         List<Reservation> result = reservations.values().stream()
-                .filter(res -> res.studentID.equals(studentId))
+                .filter(res -> res.getStudentID().equals(studentId))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
     }
@@ -41,17 +42,17 @@ public class ReservationController {
     @GetMapping("/instructor/{instructorId}")
     public ResponseEntity<?> getReservationsByInstructorId(@PathVariable Long instructorId) {
         List<Reservation> result = reservations.values().stream()
-                .filter(res -> res.instructorID.equals(instructorId))
+                .filter(res -> res.getInstructorID().equals(instructorId))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
     }
 
     @PostMapping
     public ResponseEntity<?> addReservation(@RequestBody Reservation reservation) {
-        if (reservations.containsKey(reservation.id)) {
+        if (reservations.containsKey(reservation.getId())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(), "error", "Reservation already exists"));
         }
-        reservations.put(reservation.id, reservation);
+        reservations.put(reservation.getId(), reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", HttpStatus.CREATED.value(), "reservation", reservation));
     }
 
@@ -60,7 +61,7 @@ public class ReservationController {
         if (!reservations.containsKey(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
         }
-        reservations.get(id).reservationTime = newTime;
+        reservations.get(id).setReservationTime(newTime);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservations.get(id)));
     }
 
@@ -69,7 +70,7 @@ public class ReservationController {
         if (!reservations.containsKey(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
         }
-        reservations.get(id).reservationDate = newDate;
+        reservations.get(id).setReservationDate(newDate);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservations.get(id)));
     }
 
@@ -78,7 +79,7 @@ public class ReservationController {
         if (!reservations.containsKey(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
         }
-        reservations.get(id).instructorID = newInstructorId;
+        reservations.get(id).setInstructorID(newInstructorId);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservations.get(id)));
     }
 
@@ -87,7 +88,7 @@ public class ReservationController {
         if (!reservations.containsKey(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
         }
-        reservations.get(id).studentID = newStudentId;
+        reservations.get(id).setStudentID(newStudentId);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservations.get(id)));
     }
 
@@ -98,14 +99,5 @@ public class ReservationController {
         }
         reservations.remove(id);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "message", "Reservation deleted successfully"));
-    }
-
-    static class Reservation {
-        public Long id;
-        public Boolean isReserved;
-        public Long studentID;
-        public Long instructorID;
-        public LocalDate reservationDate;
-        public LocalTime reservationTime;
     }
 }
