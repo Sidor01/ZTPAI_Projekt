@@ -210,12 +210,11 @@ h2 {
 }
 
 .userIcon {
-    width: 40px;
-    height: 40px;
     position: absolute;
-    top: 10px;
+    top: 20px; /* Adjust the top position */
     left: 50%;
     transform: translateX(-50%);
+    margin-top: 20px; /* Adjust the margin to move the image down */
 }
 
 .reservations {
@@ -238,5 +237,27 @@ h2 {
 
 .reservations:hover {
     background-color: #575875;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.refresh-button {
+    position: absolute;
+    top: 50px;
+    left: 1950px;
+    padding: 5px 10px;
+    background-color: #575875;
+    color: black;
+    font-weight: normal;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+.refresh-button:hover {
+    background-color: #616283;
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.4);
 }

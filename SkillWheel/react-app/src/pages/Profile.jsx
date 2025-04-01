@@ -118,7 +118,7 @@ export default function Profile() {
                 </button>
             </div>
             <div className="intersection-box">
-                <img src="/react-app/src/assets/bussiness-man-1.png" alt="UserIcon" className="userIcon"/>
+                <img src="/assets/bussiness-man-2.png" alt="UserIcon" className="userIcon"/>
                 <h3>Jan Kowalski</h3>
             </div>
         </div>

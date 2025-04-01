@@ -7,8 +7,7 @@ export default function Reservations() {
     const [reservations, setReservations] = useState([]);
     const [instructor, setInstructor] = useState({ name: '', surname: '' });
 
-    useEffect(() => {
-        // Fetch reservations
+    const fetchReservations = () => {
         fetch('/api/reservations/instructor/1')
             .then(response => response.json())
             .then(data => {
@@ -19,8 +18,9 @@ export default function Reservations() {
                 }
             })
             .catch(error => console.error('Error fetching reservations:', error));
+    };
 
-        // Fetch instructor details
+    const fetchInstructor = () => {
         fetch('/api/instructors/1')
             .then(response => response.json())
             .then(data => {
@@ -31,6 +31,11 @@ export default function Reservations() {
                 }
             })
             .catch(error => console.error('Error fetching instructor:', error));
+    };
+
+    useEffect(() => {
+        fetchReservations();
+        fetchInstructor();
     }, []);
 
     const handleReserve = (id) => {
@@ -49,10 +54,17 @@ export default function Reservations() {
         navigate('/make-a-reservation');
     };
 
+    const handleRefreshClick = () => {
+        fetchReservations();
+    };
+
     return (
         <div className="container">
             <div className="top-bar">
                 <h1>Reservations | Instructor</h1>
+                <button className="refresh-button" onClick={handleRefreshClick}>
+                    Refresh
+                </button>
             </div>
             <div className="left-bar">
                 <button className="profile" onClick={handleProfileClick}>
@@ -66,7 +78,7 @@ export default function Reservations() {
                 </button>
             </div>
             <div className="intersection-box">
-                <img src="/react-app/src/assets/bussiness-man-1.png" alt="UserIcon" className="userIcon"/>
+                <img src="/assets/bussiness-man-2.png" alt="UserIcon" className="userIcon"/>
                 <h3>Jan Kowalski</h3>
             </div>
             <div className="reservation-box">
@@ -81,13 +93,9 @@ export default function Reservations() {
                                     <p className="reservation-location">{reservationPlace}</p>
                                 </div>
                                 <div className="reservation-action">
-                                    {isReserved ? (
+                                    {isReserved && (
                                         <button className="reserved-button" disabled>
                                             Reserved
-                                        </button>
-                                    ) : (
-                                        <button className="reserve-button" onClick={() => handleReserve(id)}>
-                                            Reserve
                                         </button>
                                     )}
                                 </div>
