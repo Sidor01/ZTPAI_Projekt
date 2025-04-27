@@ -26,6 +26,10 @@ public class InstructorService {
         return instructorRepository.findById(id);
     }
 
+    public boolean existsByEmail(String email) {
+        return instructorRepository.existsByEmail(email);
+    }
+
     public Instructor addInstructor(Instructor instructor) {
         return instructorRepository.save(instructor);
     }
