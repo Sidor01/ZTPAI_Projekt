@@ -54,11 +54,12 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/students/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Alice")))
-                .andExpect(jsonPath("$.surname", is("Johnson")))
-                .andExpect(jsonPath("$.email", is("alice@example.com")))
-                .andExpect(jsonPath("$.nameOfSchool", is("Springfield High")));
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.student.id", is(1)))
+                .andExpect(jsonPath("$.student.name", is("Alice")))
+                .andExpect(jsonPath("$.student.surname", is("Johnson")))
+                .andExpect(jsonPath("$.student.email", is("alice@example.com")))
+                .andExpect(jsonPath("$.student.nameOfSchool", is("Springfield High")));
     }
 
     @Test
@@ -66,7 +67,9 @@ class StudentControllerTest {
         when(studentService.getStudentById(99L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/students/99"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("Student not found")));
     }
 
     @Test
@@ -78,9 +81,10 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/students"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(2)))
-                .andExpect(jsonPath("$[0].name", is("Bob")));
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.students", hasSize(1)))
+                .andExpect(jsonPath("$.students[0].id", is(2)))
+                .andExpect(jsonPath("$.students[0].name", is("Bob")));
     }
 
     @Test
@@ -89,7 +93,8 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/students"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", empty()));
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.students", empty()));
     }
 
     @Test
@@ -104,9 +109,10 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newStudent)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(3)))
-                .andExpect(jsonPath("$.name", is("Charlie")))
-                .andExpect(jsonPath("$.nameOfSchool", is("Springfield High")));
+                .andExpect(jsonPath("$.status", is(201)))
+                .andExpect(jsonPath("$.student.id", is(3)))
+                .andExpect(jsonPath("$.student.name", is("Charlie")))
+                .andExpect(jsonPath("$.student.nameOfSchool", is("Springfield High")));
     }
 
     @Test
@@ -121,8 +127,9 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedStudent)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.surname", is("Johnson-Smith")))
-                .andExpect(jsonPath("$.nameOfSchool", is("Updated School")));
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.student.surname", is("Johnson-Smith")))
+                .andExpect(jsonPath("$.student.nameOfSchool", is("Updated School")));
     }
 
     @Test
@@ -136,7 +143,9 @@ class StudentControllerTest {
         mockMvc.perform(put("/api/students/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nonExistingStudent)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("Student not found")));
     }
 
     @Test
@@ -144,7 +153,9 @@ class StudentControllerTest {
         when(studentService.deleteStudent(1L)).thenReturn(true);
 
         mockMvc.perform(delete("/api/students/1"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.message", is("Student deleted successfully")));
     }
 
     @Test
@@ -152,9 +163,10 @@ class StudentControllerTest {
         when(studentService.deleteStudent(99L)).thenReturn(false);
 
         mockMvc.perform(delete("/api/students/99"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", is("Student not found")));
     }
-
     @Test
     void addStudent_ShouldReturn422WhenValidationFails() throws Exception {
         Student invalidStudent = new Student();
@@ -168,16 +180,17 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidStudent)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.name", anyOf(
+                .andExpect(jsonPath("$.status", is(422)))
+                .andExpect(jsonPath("$.errors.name", anyOf(
                         is("Name is mandatory"),
                         is("Name must be between 2 and 50 characters")
                 )))
-                .andExpect(jsonPath("$.surname", anyOf(
+                .andExpect(jsonPath("$.errors.surname", anyOf(
                         is("Surname is mandatory"),
                         is("Surname must be between 2 and 50 characters")
                 )))
-                .andExpect(jsonPath("$.email", is("Email should be valid")))
-                .andExpect(jsonPath("$.password", anyOf(
+                .andExpect(jsonPath("$.errors.email", is("Email should be valid")))
+                .andExpect(jsonPath("$.errors.password", anyOf(
                         is("Password is mandatory"),
                         is("Password must be at least 8 characters long")
                 )));
@@ -191,9 +204,11 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidStudent)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.name", is("Name must be between 2 and 50 characters")))
-                .andExpect(jsonPath("$.surname", is("Surname must be between 2 and 50 characters")))
-                .andExpect(jsonPath("$.email", is("Email should be valid")))
-                .andExpect(jsonPath("$.password", is("Password must be at least 8 characters long")));
+                .andExpect(jsonPath("$.status", is(422)))
+                .andExpect(jsonPath("$.errors.name", is("Name must be between 2 and 50 characters")))
+                .andExpect(jsonPath("$.errors.surname", is("Surname must be between 2 and 50 characters")))
+                .andExpect(jsonPath("$.errors.email", is("Email should be valid")))
+                .andExpect(jsonPath("$.errors.password", is("Password must be at least 8 characters long")));
     }
+
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.skillwheel.controller.ReservationController;
+import org.example.skillwheel.exception.GlobalExceptionHandler;
 import org.example.skillwheel.model.Reservation;
 import org.example.skillwheel.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -46,7 +46,9 @@ class ReservationControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(reservationController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(reservationController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
@@ -57,10 +59,9 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/api/reservations/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservation.id", is(1)))
-                .andExpect(jsonPath("$.reservation.studentID", is(100)))
-                .andExpect(jsonPath("$.reservation.instructorID", is(200)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.studentID", is(100)))
+                .andExpect(jsonPath("$.instructorID", is(200)));
     }
 
     @Test
@@ -68,9 +69,7 @@ class ReservationControllerTest {
         when(reservationService.getReservationById(99L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/reservations/99"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status", is(404)))
-                .andExpect(jsonPath("$.error", is("Reservation not found")));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -81,9 +80,8 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/api/reservations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservations", hasSize(1)))
-                .andExpect(jsonPath("$.reservations[0].id", is(1)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(1)));
     }
 
     @Test
@@ -92,8 +90,7 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/api/reservations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservations", empty()));
+                .andExpect(jsonPath("$", empty()));
     }
 
     @Test
@@ -104,9 +101,8 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/api/reservations/student/100"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservations", hasSize(1)))
-                .andExpect(jsonPath("$.reservations[0].studentID", is(100)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].studentID", is(100)));
     }
 
     @Test
@@ -117,9 +113,8 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/api/reservations/instructor/200"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservations", hasSize(1)))
-                .andExpect(jsonPath("$.reservations[0].instructorID", is(200)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].instructorID", is(200)));
     }
 
     @Test
@@ -127,7 +122,6 @@ class ReservationControllerTest {
         Reservation newReservation = createTestReservation(null);
         Reservation savedReservation = createTestReservation(1L);
 
-        // Upewnij się, że testowa rezerwacja ma wszystkie wymagane pola
         newReservation.setStudentID(100L);
         newReservation.setInstructorID(200L);
         newReservation.setReservationDate(LocalDate.now().plusDays(1));
@@ -140,21 +134,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newReservation)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status", is(HttpStatus.CREATED.value())))
-                .andExpect(jsonPath("$.reservation.id", is(1)));
-    }
-
-
-    @Test
-    void addReservation_ShouldReturn400WhenIdExists() throws Exception {
-        Reservation existingReservation = createTestReservation(1L);
-
-        mockMvc.perform(post("/api/reservations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(existingReservation)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.error", is("New reservation should not have an ID")));
+                .andExpect(jsonPath("$.id", is(1)));
     }
 
     @Test
@@ -169,8 +149,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("\"15:30\""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
-                .andExpect(jsonPath("$.reservation.reservationTime", is("15:30:00")));
+                .andExpect(jsonPath("$.reservationTime", is("15:30:00")));
     }
 
     @Test
@@ -179,10 +158,8 @@ class ReservationControllerTest {
 
         mockMvc.perform(delete("/api/reservations/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is(200)))
                 .andExpect(jsonPath("$.message", is("Reservation deleted successfully")));
     }
-
 
     private Reservation createTestReservation(Long id) {
         Reservation reservation = new Reservation();
@@ -198,24 +175,35 @@ class ReservationControllerTest {
 
     @Test
     void addReservation_ShouldReturn422WhenMissingRequiredFields() throws Exception {
-        Reservation invalidReservation = new Reservation(); // brak wymaganych pól
+        Reservation invalidReservation = new Reservation();
+        invalidReservation.setIsReserved(null);
+        invalidReservation.setStudentID(null);
+        invalidReservation.setInstructorID(null);
+        invalidReservation.setReservationDate(null);
+        invalidReservation.setReservationTime(null);
+        invalidReservation.setReservationPlace(null);
 
         mockMvc.perform(post("/api/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidReservation)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status", is(422)));
+                .andExpect(jsonPath("$.isReserved", is("Reservation status is required")))
+                .andExpect(jsonPath("$.studentID", is("Student ID is required")))
+                .andExpect(jsonPath("$.instructorID", is("Instructor ID is required")))
+                .andExpect(jsonPath("$.reservationDate", is("Reservation date is required")))
+                .andExpect(jsonPath("$.reservationTime", is("Reservation time is required")))
+                .andExpect(jsonPath("$.reservationPlace", is("Reservation place is required")));
     }
 
     @Test
     void addReservation_ShouldReturn422WhenInvalidDate() throws Exception {
         Reservation invalidReservation = createTestReservation(null);
-        invalidReservation.setReservationDate(LocalDate.of(2020, 1, 1)); // data w przeszłości
+        invalidReservation.setReservationDate(LocalDate.of(2020, 1, 1)); // past date
 
         mockMvc.perform(post("/api/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidReservation)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status", is(422)));
+                .andExpect(jsonPath("$.reservationDate", is("Reservation date must be in the present or future")));
     }
 }

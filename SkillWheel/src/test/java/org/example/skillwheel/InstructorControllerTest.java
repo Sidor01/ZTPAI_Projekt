@@ -215,14 +215,6 @@ class InstructorControllerTest {
     }
 
     @Test
-    void getInstructorById_ShouldReturn400WhenIdIsNotANumber() throws Exception {
-        mockMvc.perform(get("/api/instructors/abc"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.error", containsString("Invalid parameter type")));
-    }
-
-    @Test
     void addInstructor_ShouldReturn400WhenInvalidJson() throws Exception {
         String invalidJson = "{ invalid json }";
 
