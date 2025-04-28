@@ -1,5 +1,6 @@
 package org.example.skillwheel.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -26,8 +27,11 @@ public class Reservation {
     private LocalDate reservationDate;
 
     @Column(name = "reservation_time", nullable = false)
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime reservationTime;
+
     @Column(name = "reservation_place", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private String reservationPlace;
 
     public Reservation() {

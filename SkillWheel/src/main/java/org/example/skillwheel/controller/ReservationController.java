@@ -1,17 +1,17 @@
 package org.example.skillwheel.controller;
 
+import jakarta.validation.Valid;
 import org.example.skillwheel.model.Reservation;
 import org.example.skillwheel.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -52,12 +52,36 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addReservation(@RequestBody Reservation reservation) {
+    public ResponseEntity<?> addReservation(@Valid @RequestBody Reservation reservation, BindingResult bindingResult) {
+        // Walidacja istnienia ID
         if (reservation.getId() != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", HttpStatus.BAD_REQUEST.value(), "error", "New reservation should not have an ID"));
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("error", "New reservation should not have an ID");
+            return ResponseEntity.badRequest().body(response);
         }
+
+        // Walidacja danych wejściowych
+        if (bindingResult.hasErrors()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+            response.put("error", "Validation failed");
+            return ResponseEntity.unprocessableEntity().body(response);
+        }
+
+        // Walidacja daty
+        if (reservation.getReservationDate() == null || reservation.getReservationDate().isBefore(LocalDate.now())) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+            response.put("error", "Future date required");
+            return ResponseEntity.unprocessableEntity().body(response);
+        }
+
         Reservation savedReservation = reservationService.addReservation(reservation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", HttpStatus.CREATED.value(), "reservation", savedReservation));
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.CREATED.value());
+        response.put("reservation", savedReservation);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}/time")
