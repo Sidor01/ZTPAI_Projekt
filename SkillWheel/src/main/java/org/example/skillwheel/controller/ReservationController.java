@@ -7,17 +7,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.example.skillwheel.exception.ResourceNotFoundException;
+import org.example.skillwheel.model.Instructor;
 import org.example.skillwheel.model.Reservation;
 import org.example.skillwheel.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -32,198 +34,191 @@ public class ReservationController {
 
     @Operation(summary = "Pobierz wszystkie rezerwacje")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista rezerwacji")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of reservations",
+                    content = @Content(schema = @Schema(implementation = Reservation.class, type = "array")))
     })
     @GetMapping
     public ResponseEntity<?> getAllReservations() {
         List<Reservation> reservations = reservationService.getAllReservations();
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", reservations));
+        return ResponseEntity.ok(reservations);
     }
 
     @Operation(summary = "Pobierz rezerwację po ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Rezerwacja znaleziona"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Reservation found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}")))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getReservationById(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id) {
-        Optional<Reservation> reservation = reservationService.getReservationById(id);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> getReservationById(@Parameter(description = "ID rezerwacji", required = true)
+                                                @PathVariable Long id) {
+        return reservationService.getReservationById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Pobierz rezerwacje dla studenta")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista rezerwacji studenta")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved student's reservations",
+                    content = @Content(schema = @Schema(implementation = Reservation.class, type = "array"))),
+            @ApiResponse(responseCode = "400", description = "Invalid student ID format",
+            content = @Content(schema = @Schema(
+                    example = "{\"status\":400,\"error\":\"Invalid parameter\",\"message\":\"Failed to convert value of type 'String' to required type 'Long'\"}")))
     })
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<?> getReservationsByStudentId(
-            @Parameter(description = "ID studenta", required = true)
-            @PathVariable Long studentId) {
-        List<Reservation> result = reservationService.getReservationsByStudentId(studentId);
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
+    public ResponseEntity<?> getReservationsByStudentId(@Parameter(description = "ID studenta", required = true)
+                                                        @PathVariable Long studentId) {
+        return ResponseEntity.ok(reservationService.getReservationsByStudentId(studentId));
     }
 
     @Operation(summary = "Pobierz rezerwacje dla instruktora")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista rezerwacji instruktora")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved instructor's reservations",
+                    content = @Content(schema = @Schema(implementation = Reservation.class, type = "array"))),
+            @ApiResponse(responseCode = "400", description = "Invalid instructor ID format",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid parameter\",\"message\":\"Failed to convert value of type 'String' to required type 'Long'\"}")))
     })
     @GetMapping("/instructor/{instructorId}")
-    public ResponseEntity<?> getReservationsByInstructorId(
-            @Parameter(description = "ID instruktora", required = true)
-            @PathVariable Long instructorId) {
-        List<Reservation> result = reservationService.getReservationsByInstructorId(instructorId);
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
+    public ResponseEntity<?> getReservationsByInstructorId(@Parameter(description = "ID instruktora", required = true)
+                                                           @PathVariable Long instructorId) {
+        return ResponseEntity.ok(reservationService.getReservationsByInstructorId(instructorId));
     }
 
     @Operation(summary = "Dodaj nową rezerwację")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Rezerwacja utworzona"),
-            @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane (ID nie powinno być podane)"),
-            @ApiResponse(responseCode = "422", description = "Błąd walidacji lub data w przeszłości")
+            @ApiResponse(responseCode = "201", description = "Reservation created successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input (e.g., reservation with ID provided)",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"New reservation should not have an ID\"}"))),
+            @ApiResponse(responseCode = "422", description = "Validation error",
+                    content = @Content(schema = @Schema(
+                            example = "{\"date\":\"Date must be in the future\",\"time\":\"Time must be during working hours\"}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid JSON input",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"JSON parse error: Unexpected character ('X' (code 88)): was expecting double-quote to start field name\"}")))
     })
     @PostMapping
     public ResponseEntity<?> addReservation(
             @Parameter(description = "Nowa rezerwacja", required = true,
                     content = @Content(schema = @Schema(implementation = Reservation.class)))
-            @Valid @RequestBody Reservation reservation,
-            BindingResult bindingResult) {
+            @Valid @RequestBody Reservation reservation) {
 
         if (reservation.getId() != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", HttpStatus.BAD_REQUEST.value());
-            response.put("error", "New reservation should not have an ID");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        if (bindingResult.hasErrors()) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
-            response.put("error", "Validation failed");
-            return ResponseEntity.unprocessableEntity().body(response);
-        }
-
-        if (reservation.getReservationDate() == null || reservation.getReservationDate().isBefore(LocalDate.now())) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
-            response.put("error", "Future date required");
-            return ResponseEntity.unprocessableEntity().body(response);
+            throw new IllegalArgumentException("New reservation should not have an ID");
         }
 
         Reservation savedReservation = reservationService.addReservation(reservation);
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.CREATED.value());
-        response.put("reservation", savedReservation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedReservation);
     }
 
     @Operation(summary = "Zaktualizuj godzinę rezerwacji")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Godzina rezerwacji zaktualizowana"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Reservation date updated successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid date format",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"JSON parse error: Cannot deserialize value of type `java.time.LocalDate` from String \\\"2023-02-30\\\": Text '2023-02-30' could not be parsed: Invalid date 'FEBRUARY 30'\"}")))
     })
     @PutMapping("/{id}/time")
-    public ResponseEntity<?> updateReservationTime(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Nowa godzina rezerwacji", required = true)
-            @RequestBody LocalTime newTime) {
-        Optional<Reservation> reservation = reservationService.updateReservationTime(id, newTime);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> updateReservationTime(@PathVariable Long id, @RequestBody LocalTime newTime) {
+        return reservationService.updateReservationTime(id, newTime)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Zaktualizuj datę rezerwacji")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Data rezerwacji zaktualizowana"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Reservation date updated successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid date format",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"JSON parse error: Cannot deserialize value of type `java.time.LocalDate` from String \\\"2023-02-30\\\": Text '2023-02-30' could not be parsed: Invalid date 'FEBRUARY 30'\"}")))
     })
     @PutMapping("/{id}/date")
-    public ResponseEntity<?> updateReservationDate(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Nowa data rezerwacji", required = true)
-            @RequestBody LocalDate newDate) {
-        Optional<Reservation> reservation = reservationService.updateReservationDate(id, newDate);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> updateReservationDate(@PathVariable Long id, @RequestBody LocalDate newDate) {
+        return reservationService.updateReservationDate(id, newDate)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Zaktualizuj instruktora w rezerwacji")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instruktor zaktualizowany w rezerwacji"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Instructor updated successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid instructor ID format",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"JSON parse error: Cannot deserialize value of type `java.lang.Long` from String \\\"abc\\\": not a valid Long value\"}")))
     })
     @PutMapping("/{id}/instructor")
-    public ResponseEntity<?> updateInstructor(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "ID nowego instruktora", required = true)
-            @RequestBody Long newInstructorId) {
-        Optional<Reservation> reservation = reservationService.updateInstructor(id, newInstructorId);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> updateInstructor(@PathVariable Long id, @RequestBody Long newInstructorId) {
+        return reservationService.updateInstructor(id, newInstructorId)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Zaktualizuj studenta w rezerwacji")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Student zaktualizowany w rezerwacji"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Student updated successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid student ID format",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"JSON parse error: Cannot deserialize value of type `java.lang.Long` from String \\\"abc\\\": not a valid Long value\"}")))
     })
     @PutMapping("/{id}/student")
-    public ResponseEntity<?> updateStudent(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "ID nowego studenta", required = true)
-            @RequestBody Long newStudentId) {
-        Optional<Reservation> reservation = reservationService.updateStudent(id, newStudentId);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Long newStudentId) {
+        return reservationService.updateStudent(id, newStudentId)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Zaktualizuj miejsce rezerwacji")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Miejsce rezerwacji zaktualizowane"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Place updated successfully",
+                    content = @Content(schema = @Schema(implementation = Reservation.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}"))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(schema = @Schema(
+                            example = "{\"status\":400,\"error\":\"Invalid JSON\",\"message\":\"Required request body is missing\"}")))
     })
     @PutMapping("/{id}/place")
-    public ResponseEntity<?> updateReservationPlace(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Nowe miejsce rezerwacji", required = true)
-            @RequestBody String newPlace) {
-        Optional<Reservation> reservation = reservationService.updateReservationPlace(id, newPlace);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
-        }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
+    public ResponseEntity<?> updateReservationPlace(@PathVariable Long id, @RequestBody String newPlace) {
+        return reservationService.updateReservationPlace(id, newPlace)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     @Operation(summary = "Usuń rezerwację")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Rezerwacja usunięta"),
-            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+            @ApiResponse(responseCode = "200", description = "Reservation deleted successfully",
+                    content = @Content(schema = @Schema(
+                            example = "{\"message\":\"Reservation deleted successfully\"}"))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found",
+                    content = @Content(schema = @Schema(
+                            example = "{\"error\":\"Reservation not found with ID: 1\",\"status\":404}")))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReservation(
-            @Parameter(description = "ID rezerwacji", required = true)
-            @PathVariable Long id) {
-        boolean isDeleted = reservationService.deleteReservation(id);
-        if (!isDeleted) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
+    public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
+        if (!reservationService.deleteReservation(id)) {
+            throw new ResourceNotFoundException("Reservation not found with ID: " + id);
         }
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "message", "Reservation deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "Reservation deleted successfully"));
     }
 }

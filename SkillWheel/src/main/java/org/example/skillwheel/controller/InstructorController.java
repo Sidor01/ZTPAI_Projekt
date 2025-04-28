@@ -14,13 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,8 +33,10 @@ public class InstructorController {
 
     @Operation(summary = "Pobierz instruktora po ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instruktor znaleziony"),
-            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony")
+            @ApiResponse(responseCode = "200", description = "Instruktor znaleziony",
+                    content = @Content(schema = @Schema(implementation = Instructor.class))),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony",
+                    content = @Content(schema = @Schema(example = "{\"status\":404,\"error\":\"Instructor not found\"}")))
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> getInstructorById(
@@ -60,7 +58,8 @@ public class InstructorController {
 
     @Operation(summary = "Pobierz wszystkich instruktorów")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista instruktorów")
+            @ApiResponse(responseCode = "200", description = "Lista instruktorów",
+                    content = @Content(schema = @Schema(example = "{\"status\":200,\"instructors\":[]}")))
     })
     @GetMapping
     public ResponseEntity<?> getAllInstructors() {
@@ -73,10 +72,14 @@ public class InstructorController {
 
     @Operation(summary = "Dodaj nowego instruktora")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Instruktor dodany"),
-            @ApiResponse(responseCode = "400", description = "Nieprawidłowy format JSON"),
-            @ApiResponse(responseCode = "409", description = "Instruktor z tym emailem już istnieje"),
-            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych")
+            @ApiResponse(responseCode = "201", description = "Instruktor dodany",
+                    content = @Content(schema = @Schema(implementation = Instructor.class))),
+            @ApiResponse(responseCode = "400", description = "Nieprawidłowy format JSON lub pusty request body",
+                    content = @Content(schema = @Schema(example = "{\"status\":400,\"error\":\"Invalid JSON format\"}"))),
+            @ApiResponse(responseCode = "409", description = "Instruktor z tym emailem już istnieje",
+                    content = @Content(schema = @Schema(example = "{\"status\":409,\"error\":\"Instructor with this email already exists\"}"))),
+            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych",
+                    content = @Content(schema = @Schema(example = "{\"status\":422,\"errors\":{\"email\":\"must be a valid email\"}}")))
     })
     @PostMapping
     public ResponseEntity<?> addInstructor(
@@ -132,9 +135,12 @@ public class InstructorController {
 
     @Operation(summary = "Aktualizuj dane instruktora")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instruktor zaktualizowany"),
-            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony"),
-            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych")
+            @ApiResponse(responseCode = "200", description = "Instruktor zaktualizowany",
+                    content = @Content(schema = @Schema(implementation = Instructor.class))),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony",
+                    content = @Content(schema = @Schema(example = "{\"status\":404,\"error\":\"Instructor not found\"}"))),
+            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych",
+                    content = @Content(schema = @Schema(example = "{\"status\":422,\"errors\":{\"firstName\":\"must not be blank\"}}")))
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateInstructor(
@@ -164,8 +170,10 @@ public class InstructorController {
 
     @Operation(summary = "Usuń instruktora")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instruktor usunięty"),
-            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony")
+            @ApiResponse(responseCode = "200", description = "Instruktor usunięty",
+                    content = @Content(schema = @Schema(example = "{\"status\":200,\"message\":\"Instructor deleted successfully\"}"))),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony",
+                    content = @Content(schema = @Schema(example = "{\"status\":404,\"error\":\"Instructor not found\"}")))
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteInstructor(
@@ -199,26 +207,5 @@ public class InstructorController {
                         "status", HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "errors", errors
                 ));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return buildValidationErrorResponse(ex.getBindingResult());
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleJsonParseException(HttpMessageNotReadableException ex) {
-        return ResponseEntity.badRequest().body(
-                Map.of("status", HttpStatus.BAD_REQUEST.value(),
-                        "error", "Invalid JSON format")
-        );
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        return ResponseEntity.badRequest().body(
-                Map.of("status", HttpStatus.BAD_REQUEST.value(),
-                        "error", "Invalid parameter type: " + ex.getMessage())
-        );
     }
 }
