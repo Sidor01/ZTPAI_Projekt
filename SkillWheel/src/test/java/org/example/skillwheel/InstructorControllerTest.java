@@ -182,10 +182,10 @@ class InstructorControllerTest {
     @Test
     void addInstructor_ShouldReturn422WhenValidationFails() throws Exception {
         Instructor invalidInstructor = new Instructor();
-        invalidInstructor.setName("");
-        invalidInstructor.setSurname("");
+        invalidInstructor.setName(null);  // Explicit null to trigger NotBlank
+        invalidInstructor.setSurname(null);  // Explicit null to trigger NotBlank
         invalidInstructor.setEmail("invalid-email");
-        invalidInstructor.setPassword("");
+        invalidInstructor.setPassword(null);  // Explicit null to trigger NotBlank
         invalidInstructor.setNameOfSchool("");
 
         mockMvc.perform(post("/api/instructors")
@@ -212,5 +212,67 @@ class InstructorControllerTest {
                 .andExpect(jsonPath("$.errors.surname", is("Surname must be between 2 and 50 characters")))
                 .andExpect(jsonPath("$.errors.email", is("Email should be valid")))
                 .andExpect(jsonPath("$.errors.password", is("Password must be at least 8 characters long")));
+    }
+
+    @Test
+    void getInstructorById_ShouldReturn400WhenIdIsNotANumber() throws Exception {
+        mockMvc.perform(get("/api/instructors/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", containsString("Invalid parameter type")));
+    }
+
+    @Test
+    void addInstructor_ShouldReturn400WhenInvalidJson() throws Exception {
+        String invalidJson = "{ invalid json }";
+
+        mockMvc.perform(post("/api/instructors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("Invalid JSON format")));
+    }
+
+    @Test
+    void addInstructor_ShouldReturn400WhenDateIsInvalid() throws Exception {
+        String jsonWithInvalidDate = """
+    {
+        "name": "John",
+        "surname": "Doe",
+        "email": "john@example.com",
+        "password": "password123",
+        "nameOfSchool": "School",
+        "birthDate": "2023-13-45"
+    }
+    """;
+
+        mockMvc.perform(post("/api/instructors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonWithInvalidDate))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", containsString("Invalid JSON format")));
+    }
+
+    @Test
+    void addInstructor_ShouldReturn400WhenNumericFieldIsString() throws Exception {
+        String jsonWithInvalidType = """
+    {
+        "name": "John",
+        "surname": "Doe",
+        "email": "john@example.com",
+        "password": "password123",
+        "nameOfSchool": "School",
+        "age": "not-a-number"
+    }
+    """;
+
+        mockMvc.perform(post("/api/instructors")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonWithInvalidType))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.error", is("Invalid JSON format")));
     }
 }

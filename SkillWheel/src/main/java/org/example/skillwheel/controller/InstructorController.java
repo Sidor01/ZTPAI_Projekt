@@ -1,19 +1,21 @@
 package org.example.skillwheel.controller;
 
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.*;
 import org.example.skillwheel.model.Instructor;
 import org.example.skillwheel.service.InstructorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -54,44 +56,56 @@ public class InstructorController {
 
 
     @PostMapping
-    public ResponseEntity<?> addInstructor(@Valid @RequestBody Instructor instructor, BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new LinkedHashMap<>();
-
-            bindingResult.getFieldErrors().forEach(error -> {
-                if (error.getRejectedValue() != null &&
-                        error.getRejectedValue().toString().isEmpty() &&
-                        error.getCode().equals("NotBlank")) {
-                    errors.put(error.getField(), error.getDefaultMessage());
-                } else if (!errors.containsKey(error.getField())) {
-                    errors.put(error.getField(), error.getDefaultMessage());
-                }
-            });
-
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(Map.of(
-                            "status", HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                            "errors", errors
-                    ));
-        }
-
-        if (instructor == null) {
+    public ResponseEntity<?> addInstructor(@RequestBody String instructorJson) {
+        // First check if the JSON string is empty
+        if (instructorJson == null || instructorJson.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(
                     Map.of("status", HttpStatus.BAD_REQUEST.value(),
-                            "error", "Instructor data cannot be null"));
+                            "error", "Request body cannot be empty"));
         }
 
-        if (instructorService.existsByEmail(instructor.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    Map.of("status", HttpStatus.CONFLICT.value(),
-                            "error", "Instructor with this email already exists"));
-        }
+        try {
+            // Parse JSON manually to catch parsing errors early
+            ObjectMapper objectMapper = new ObjectMapper();
+            Instructor instructor = objectMapper.readValue(instructorJson, Instructor.class);
 
-        Instructor savedInstructor = instructorService.addInstructor(instructor);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                Map.of("status", HttpStatus.CREATED.value(),
-                        "instructor", savedInstructor));
+            // Now validate the instructor object
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Instructor>> violations = validator.validate(instructor);
+
+            if (!violations.isEmpty()) {
+                Map<String, String> errors = new HashMap<>();
+                for (ConstraintViolation<Instructor> violation : violations) {
+                    errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+                }
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                        .body(Map.of(
+                                "status", HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                                "errors", errors
+                        ));
+            }
+
+            if (instructorService.existsByEmail(instructor.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                        Map.of("status", HttpStatus.CONFLICT.value(),
+                                "error", "Instructor with this email already exists"));
+            }
+
+            Instructor savedInstructor = instructorService.addInstructor(instructor);
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    Map.of("status", HttpStatus.CREATED.value(),
+                            "instructor", savedInstructor));
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("status", HttpStatus.BAD_REQUEST.value(),
+                            "error", "Invalid JSON format"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "error", "An unexpected error occurred"));
+        }
     }
 
     @PutMapping("/{id}")
@@ -146,5 +160,25 @@ public class InstructorController {
                         "status", HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "errors", errors
                 ));
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        return buildValidationErrorResponse(ex.getBindingResult());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleJsonParseException(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(
+                Map.of("status", HttpStatus.BAD_REQUEST.value(),
+                        "error", "Invalid JSON format")
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(
+                Map.of("status", HttpStatus.BAD_REQUEST.value(),
+                        "error", "Invalid parameter type: " + ex.getMessage())
+        );
     }
 }
