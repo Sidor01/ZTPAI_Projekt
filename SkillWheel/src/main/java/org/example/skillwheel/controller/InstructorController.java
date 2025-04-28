@@ -5,6 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.*;
 import org.example.skillwheel.model.Instructor;
 import org.example.skillwheel.service.InstructorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +35,15 @@ public class InstructorController {
         this.instructorService = instructorService;
     }
 
+    @Operation(summary = "Pobierz instruktora po ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Instruktor znaleziony"),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getInstructorById(@PathVariable Long id) {
+    public ResponseEntity<?> getInstructorById(
+            @Parameter(description = "ID instruktora", required = true)
+            @PathVariable Long id) {
         Optional<Instructor> instructor = instructorService.getInstructorById(id);
         if (instructor.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -45,6 +58,10 @@ public class InstructorController {
         ));
     }
 
+    @Operation(summary = "Pobierz wszystkich instruktorów")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista instruktorów")
+    })
     @GetMapping
     public ResponseEntity<?> getAllInstructors() {
         List<Instructor> instructors = instructorService.getAllInstructors();
@@ -54,10 +71,17 @@ public class InstructorController {
         ));
     }
 
-
+    @Operation(summary = "Dodaj nowego instruktora")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Instruktor dodany"),
+            @ApiResponse(responseCode = "400", description = "Nieprawidłowy format JSON"),
+            @ApiResponse(responseCode = "409", description = "Instruktor z tym emailem już istnieje"),
+            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych")
+    })
     @PostMapping
-    public ResponseEntity<?> addInstructor(@RequestBody String instructorJson) {
-        // First check if the JSON string is empty
+    public ResponseEntity<?> addInstructor(
+            @Parameter(description = "Dane instruktora w formacie JSON", required = true)
+            @RequestBody String instructorJson) {
         if (instructorJson == null || instructorJson.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(
                     Map.of("status", HttpStatus.BAD_REQUEST.value(),
@@ -65,11 +89,9 @@ public class InstructorController {
         }
 
         try {
-            // Parse JSON manually to catch parsing errors early
             ObjectMapper objectMapper = new ObjectMapper();
             Instructor instructor = objectMapper.readValue(instructorJson, Instructor.class);
 
-            // Now validate the instructor object
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
             Set<ConstraintViolation<Instructor>> violations = validator.validate(instructor);
@@ -108,10 +130,20 @@ public class InstructorController {
         }
     }
 
+    @Operation(summary = "Aktualizuj dane instruktora")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Instruktor zaktualizowany"),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony"),
+            @ApiResponse(responseCode = "422", description = "Błąd walidacji danych")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateInstructor(@PathVariable Long id,
-                                              @Valid @RequestBody Instructor updatedInstructor,
-                                              BindingResult bindingResult) {
+    public ResponseEntity<?> updateInstructor(
+            @Parameter(description = "ID instruktora", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Nowe dane instruktora", required = true,
+                    content = @Content(schema = @Schema(implementation = Instructor.class)))
+            @Valid @RequestBody Instructor updatedInstructor,
+            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return buildValidationErrorResponse(bindingResult);
         }
@@ -130,8 +162,15 @@ public class InstructorController {
         ));
     }
 
+    @Operation(summary = "Usuń instruktora")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Instruktor usunięty"),
+            @ApiResponse(responseCode = "404", description = "Instruktor nie znaleziony")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteInstructor(@PathVariable Long id) {
+    public ResponseEntity<?> deleteInstructor(
+            @Parameter(description = "ID instruktora", required = true)
+            @PathVariable Long id) {
         boolean isDeleted = instructorService.deleteInstructor(id);
         if (!isDeleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -161,6 +200,7 @@ public class InstructorController {
                         "errors", errors
                 ));
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
         return buildValidationErrorResponse(ex.getBindingResult());
