@@ -1,5 +1,11 @@
 package org.example.skillwheel.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.example.skillwheel.model.Reservation;
 import org.example.skillwheel.service.ReservationService;
@@ -24,14 +30,25 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @Operation(summary = "Pobierz wszystkie rezerwacje")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista rezerwacji")
+    })
     @GetMapping
     public ResponseEntity<?> getAllReservations() {
         List<Reservation> reservations = reservationService.getAllReservations();
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", reservations));
     }
 
+    @Operation(summary = "Pobierz rezerwację po ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rezerwacja znaleziona"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getReservationById(@PathVariable Long id) {
+    public ResponseEntity<?> getReservationById(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id) {
         Optional<Reservation> reservation = reservationService.getReservationById(id);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -39,21 +56,43 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Pobierz rezerwacje dla studenta")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista rezerwacji studenta")
+    })
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<?> getReservationsByStudentId(@PathVariable Long studentId) {
+    public ResponseEntity<?> getReservationsByStudentId(
+            @Parameter(description = "ID studenta", required = true)
+            @PathVariable Long studentId) {
         List<Reservation> result = reservationService.getReservationsByStudentId(studentId);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
     }
 
+    @Operation(summary = "Pobierz rezerwacje dla instruktora")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista rezerwacji instruktora")
+    })
     @GetMapping("/instructor/{instructorId}")
-    public ResponseEntity<?> getReservationsByInstructorId(@PathVariable Long instructorId) {
+    public ResponseEntity<?> getReservationsByInstructorId(
+            @Parameter(description = "ID instruktora", required = true)
+            @PathVariable Long instructorId) {
         List<Reservation> result = reservationService.getReservationsByInstructorId(instructorId);
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservations", result));
     }
 
+    @Operation(summary = "Dodaj nową rezerwację")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Rezerwacja utworzona"),
+            @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane (ID nie powinno być podane)"),
+            @ApiResponse(responseCode = "422", description = "Błąd walidacji lub data w przeszłości")
+    })
     @PostMapping
-    public ResponseEntity<?> addReservation(@Valid @RequestBody Reservation reservation, BindingResult bindingResult) {
-        // Walidacja istnienia ID
+    public ResponseEntity<?> addReservation(
+            @Parameter(description = "Nowa rezerwacja", required = true,
+                    content = @Content(schema = @Schema(implementation = Reservation.class)))
+            @Valid @RequestBody Reservation reservation,
+            BindingResult bindingResult) {
+
         if (reservation.getId() != null) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.BAD_REQUEST.value());
@@ -61,7 +100,6 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        // Walidacja danych wejściowych
         if (bindingResult.hasErrors()) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
@@ -69,7 +107,6 @@ public class ReservationController {
             return ResponseEntity.unprocessableEntity().body(response);
         }
 
-        // Walidacja daty
         if (reservation.getReservationDate() == null || reservation.getReservationDate().isBefore(LocalDate.now())) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
@@ -84,8 +121,17 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Zaktualizuj godzinę rezerwacji")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Godzina rezerwacji zaktualizowana"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @PutMapping("/{id}/time")
-    public ResponseEntity<?> updateReservationTime(@PathVariable Long id, @RequestBody LocalTime newTime) {
+    public ResponseEntity<?> updateReservationTime(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Nowa godzina rezerwacji", required = true)
+            @RequestBody LocalTime newTime) {
         Optional<Reservation> reservation = reservationService.updateReservationTime(id, newTime);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -93,8 +139,17 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Zaktualizuj datę rezerwacji")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Data rezerwacji zaktualizowana"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @PutMapping("/{id}/date")
-    public ResponseEntity<?> updateReservationDate(@PathVariable Long id, @RequestBody LocalDate newDate) {
+    public ResponseEntity<?> updateReservationDate(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Nowa data rezerwacji", required = true)
+            @RequestBody LocalDate newDate) {
         Optional<Reservation> reservation = reservationService.updateReservationDate(id, newDate);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -102,8 +157,17 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Zaktualizuj instruktora w rezerwacji")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Instruktor zaktualizowany w rezerwacji"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @PutMapping("/{id}/instructor")
-    public ResponseEntity<?> updateInstructor(@PathVariable Long id, @RequestBody Long newInstructorId) {
+    public ResponseEntity<?> updateInstructor(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "ID nowego instruktora", required = true)
+            @RequestBody Long newInstructorId) {
         Optional<Reservation> reservation = reservationService.updateInstructor(id, newInstructorId);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -111,8 +175,17 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Zaktualizuj studenta w rezerwacji")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Student zaktualizowany w rezerwacji"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @PutMapping("/{id}/student")
-    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Long newStudentId) {
+    public ResponseEntity<?> updateStudent(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "ID nowego studenta", required = true)
+            @RequestBody Long newStudentId) {
         Optional<Reservation> reservation = reservationService.updateStudent(id, newStudentId);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -120,8 +193,17 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Zaktualizuj miejsce rezerwacji")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Miejsce rezerwacji zaktualizowane"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @PutMapping("/{id}/place")
-    public ResponseEntity<?> updateReservationPlace(@PathVariable Long id, @RequestBody String newPlace) {
+    public ResponseEntity<?> updateReservationPlace(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Nowe miejsce rezerwacji", required = true)
+            @RequestBody String newPlace) {
         Optional<Reservation> reservation = reservationService.updateReservationPlace(id, newPlace);
         if (reservation.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
@@ -129,8 +211,15 @@ public class ReservationController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "reservation", reservation.get()));
     }
 
+    @Operation(summary = "Usuń rezerwację")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rezerwacja usunięta"),
+            @ApiResponse(responseCode = "404", description = "Rezerwacja nie znaleziona")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<?> deleteReservation(
+            @Parameter(description = "ID rezerwacji", required = true)
+            @PathVariable Long id) {
         boolean isDeleted = reservationService.deleteReservation(id);
         if (!isDeleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", HttpStatus.NOT_FOUND.value(), "error", "Reservation not found"));
