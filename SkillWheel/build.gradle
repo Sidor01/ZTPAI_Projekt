@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.3'
+	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -24,25 +24,46 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Database
 	implementation 'org.postgresql:postgresql'
+	runtimeOnly 'org.postgresql:postgresql' // runtimeOnly wystarczy, implementation niepotrzebne
+
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+	// Lombok
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Development tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
+
+	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.hamcrest:hamcrest:2.2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
+	jvmArgs "-javaagent:${classpath.find { it.name.contains("byte-buddy-agent") }.absolutePath}"
 	useJUnitPlatform()
 }
 
 task buildReactApp(type: Exec) {
 	workingDir 'react-app'
-	commandLine 'npm', 'run', 'build'
+	commandLine '/opt/homebrew/bin/npm', 'run', 'build'
 }
 
 task copyFrontendBuild(type: Copy) {
@@ -51,4 +72,9 @@ task copyFrontendBuild(type: Copy) {
 	into 'src/main/resources/static'
 }
 
+processResources.dependsOn copyFrontendBuild
 build.dependsOn copyFrontendBuild
+
+tasks.named('processResources') {
+	dependsOn copyFrontendBuild
+}

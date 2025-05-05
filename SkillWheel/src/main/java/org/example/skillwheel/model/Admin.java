@@ -1,11 +1,17 @@
 package org.example.skillwheel.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
 @Table(name = "admins")
-public class Admin implements Serializable {
+public class Admin implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +36,9 @@ public class Admin implements Serializable {
     @Column(name = "school_name", nullable = false)
     private String schoolName;
 
-    // Default constructor
+    // Konstruktory
     public Admin() {}
 
-    // Constructor with parameters
     public Admin(String firstName, String lastName, String email, String password, Long schoolId, String schoolName) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -43,7 +48,38 @@ public class Admin implements Serializable {
         this.schoolName = schoolName;
     }
 
-    // Getters and Setters
+    // Metody z UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // Używamy email jako nazwy użytkownika
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Konto nigdy nie wygasa
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Konto nigdy nie jest zablokowane
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Dane uwierzytelniające nigdy nie wygasają
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // Konto zawsze aktywne
+    }
+
+    // Standardowe gettery i settery
     public Long getId() {
         return id;
     }
@@ -76,6 +112,7 @@ public class Admin implements Serializable {
         this.email = email;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -107,7 +144,7 @@ public class Admin implements Serializable {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
+                ", password='[PROTECTED]'" +
                 ", schoolId=" + schoolId +
                 ", schoolName='" + schoolName + '\'' +
                 '}';

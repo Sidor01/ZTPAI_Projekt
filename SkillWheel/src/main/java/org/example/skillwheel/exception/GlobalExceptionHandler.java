@@ -68,4 +68,20 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    public static class UserNotFoundException extends RuntimeException {
+        public UserNotFoundException(String message) {
+            super(message);
+        }
+    }
+    public static class UsernameTakenException extends RuntimeException {
+        public UsernameTakenException(String message) {
+            super(message);
+        }
+    }
+    public static class EmailTakenException extends RuntimeException {
+        public EmailTakenException(String message) {
+            super(message);
+        }
+    }
 }

@@ -5,11 +5,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "students")
 @Schema(description = "Encja reprezentująca studenta w systemie")
-public class Student {
+public class Student implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +47,7 @@ public class Student {
     @Schema(description = "Nazwa szkoły, do której uczęszcza student", example = "Szkoła Jazdy AutoMaster")
     private String nameOfSchool;
 
+
     public Student() {
     }
 
@@ -48,6 +57,36 @@ public class Student {
         this.email = email;
         this.password = password;
         this.nameOfSchool = nameOfSchool;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_STUDENT"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // Używamy email jako nazwy użytkownika
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public String getNameOfSchool() {
