@@ -1,70 +1,113 @@
-.login-container {
+/* Reset i podstawowe style */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    height: 100%;
+    width: 100%;
+}
+
+/* Główny kontener strony logowania */
+.login-page-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
+    padding: 20px;
 }
 
-.login-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Kontener formularza */
+.login-container {
     width: 100%;
     max-width: 400px;
+    padding: 20px;
 }
 
-.login-card h2 {
+/* Karta logowania */
+.login-box {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+}
+
+.login-title {
     text-align: center;
-    margin-bottom: 1.5rem;
-    color: #333;
+    margin-bottom: 25px;
+    color: #2c3e50;
+    font-size: 24px;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+/* Formularz */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
     font-weight: 500;
+    color: #34495e;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 0.75rem;
+.input-group input {
+    padding: 12px 15px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
 }
 
-button {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #4CAF50;
+.input-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+/* Przycisk */
+.login-button {
+    padding: 12px;
+    background-color: #3498db;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
-    margin-top: 1rem;
+    transition: background-color 0.3s;
+    margin-top: 10px;
 }
 
-button:hover {
-    background-color: #45a049;
+.login-button:hover {
+    background-color: #2980b9;
 }
 
-button:disabled {
-    background-color: #cccccc;
+.login-button:disabled {
+    background-color: #95a5a6;
     cursor: not-allowed;
 }
 
+/* Komunikat błędu */
 .error-message {
-    color: #d32f2f;
-    background-color: #fdecea;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    color: #e74c3c;
+    background-color: #fadbd8;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
     text-align: center;
+    font-size: 14px;
 }

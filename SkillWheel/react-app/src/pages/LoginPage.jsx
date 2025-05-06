@@ -47,39 +47,47 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h2>SkillWheel Login</h2>
-                {error && <div className="error-message">{error}</div>}
+        <div className="login-page-wrapper">
+            <div className="login-container">
+                <div className="login-box">
+                    <h2 className="login-title">SkillWheel Login</h2>
+                    {error && <div className="error-message">{error}</div>}
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Email:</label>
-                        <input
-                            type="email"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    <form className="login-form" onSubmit={handleSubmit}>
+                        <div className="input-group">
+                            <label htmlFor="username">Email:</label>
+                            <input
+                                id="username"
+                                type="email"
+                                name="username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Password:</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            minLength="8"
-                        />
-                    </div>
+                        <div className="input-group">
+                            <label htmlFor="password">Password:</label>
+                            <input
+                                id="password"
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                minLength="8"
+                            />
+                        </div>
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            className="login-button"
+                            disabled={loading}
+                        >
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

@@ -4,6 +4,7 @@ import Reservations from "./pages/Reservations.jsx";
 import Profile from "./pages/Profile";
 import MakeAReservation from "./pages/MakeAReservation.jsx";
 import { Link } from "react-router-dom";
+import LoginPage from "./pages/LoginPage.jsx";
 
 const App = () => {
     return (
@@ -18,7 +19,7 @@ const App = () => {
                 <Route path="/" element={<Reservations />} />
                 <Route path="/reservations" element={<Reservations />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/make-a-reservation" element={<MakeAReservation />}/>
+                <Route path="/make-a-reservation" element={<MakeAReservation />} />
             </Routes>
         </Router>
     );
