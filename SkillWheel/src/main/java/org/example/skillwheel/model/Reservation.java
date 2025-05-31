@@ -42,8 +42,8 @@ public class Reservation {
     private LocalDate reservationDate;
 
     @Column(name = "reservation_time", nullable = false)
-    @JsonFormat(pattern = "HH:mm:ss")
-    @Schema(description = "Godzina rezerwacji", example = "14:30:00", required = true)
+    @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING)
+    @Schema(description = "Godzina rezerwacji", example = "14:30", required = true)
     @NotNull(message = "Reservation time is required")
     private LocalTime reservationTime;
 
@@ -55,7 +55,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Long id, Boolean isReserved, Long studentID, Long instructorID, LocalDate reservationDate, LocalTime reservationTime, String reservationPlace) {
+    public Reservation(Long id, Boolean isReserved, Long studentID, Long instructorID, LocalDate reservationDate,
+            LocalTime reservationTime, String reservationPlace) {
         this.id = id;
         this.isReserved = isReserved;
         this.studentID = studentID;
